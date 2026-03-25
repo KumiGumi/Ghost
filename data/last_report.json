@@ -1,0 +1,77 @@
+{
+  "client": "Test Corp",
+  "score": 31,
+  "tier": "Tier 2 - Insurance Baseline",
+  "upsell": false,
+  "price_low": 2021,
+  "price_high": 2145,
+  "price_period": "monthly",
+  "summary": "Client is a 5-employee technology organization with a risk score of 31/100. Recommended tier: Tier 2 - Insurance Baseline. Top control gaps: Vulnerability Management, Network Monitoring / Defense, Security Awareness Training. Compliance requirements: . Estimated engagement value: $2,021\u2013$2,145 monthly.",
+  "tools": [
+    "Huntress (EDR + Managed SOC)",
+    "Ironscales (Email Security)",
+    "Duo / Okta (MFA)",
+    "Todyl (Edge Security / UTM)"
+  ],
+  "critical_gaps": [],
+  "all_gaps": [
+    {
+      "control": "C7",
+      "name": "Vulnerability Management",
+      "gap": "Missing: Vulnerability Management",
+      "priority": "HIGH",
+      "tool": "Qualys"
+    },
+    {
+      "control": "C13",
+      "name": "Network Monitoring / Defense",
+      "gap": "Missing: Network Monitoring / Defense",
+      "priority": "HIGH",
+      "tool": "Todyl (optional IG1)"
+    },
+    {
+      "control": "C14",
+      "name": "Security Awareness Training",
+      "gap": "Missing: Security Awareness Training",
+      "priority": "HIGH",
+      "tool": "Ironscales / Huntress SAT"
+    },
+    {
+      "control": "C16",
+      "name": "Application Allow-Listing",
+      "gap": "Missing: Application Allow-Listing",
+      "priority": "MEDIUM",
+      "tool": "AppLocker"
+    },
+    {
+      "control": "C4",
+      "name": "Secure Config of Assets",
+      "gap": "Missing: Secure Config of Assets",
+      "priority": "MEDIUM",
+      "tool": null
+    },
+    {
+      "control": "C3",
+      "name": "Data Protection (basic DLP)",
+      "gap": "Missing: Data Protection (basic DLP)",
+      "priority": "MEDIUM",
+      "tool": null
+    },
+    {
+      "control": "C17",
+      "name": "Incident Response Plan",
+      "gap": "Missing: Incident Response Plan",
+      "priority": "MEDIUM",
+      "tool": null
+    },
+    {
+      "control": "C2",
+      "name": "Software Inventory",
+      "gap": "Missing: Software Inventory",
+      "priority": "MEDIUM",
+      "tool": null
+    }
+  ],
+  "filename": "assessment_6ccaa35e_20260314_115553.pdf",
+  "timestamp": "2026-03-14 11:55"
+}
