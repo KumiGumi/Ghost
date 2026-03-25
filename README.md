@@ -1,0 +1,2 @@
+# Ghost
+Lightweight MSSP Build
