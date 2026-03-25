@@ -90,7 +90,7 @@ def insurance_baseline_prompt(intake: dict, gaps: list[dict], tools: list[str]) 
 Write a cyber insurance readiness summary for a small business client.
 
 CURRENT POSTURE:
-- Controls in place: {sum(1 for g in gaps if g not in gaps)} of {14} CIS IG1 controls
+- Controls in place: {14 - len(gaps)} of {14} CIS IG1 controls
 - Missing critical controls: {', '.join(g['name'] for g in gaps if g['priority'] == 'CRITICAL')}
 - Recommended tools for compliance: {', '.join(tools)}
 

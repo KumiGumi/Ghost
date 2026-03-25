@@ -53,7 +53,7 @@ def _store_token(token: str, real_value: str, pii_type: str, session_id: str):
     conn = sqlite3.connect(DB_PATH)
     conn.execute(
         "INSERT OR REPLACE INTO token_vault VALUES (?, ?, ?, ?, ?)",
-        (token, encrypted, pii_type, session_id, datetime.utcnow().isoformat())
+        (token, encrypted, pii_type, session_id, datetime.now(datetime.timezone.utc).isoformat())
     )
     conn.commit()
     conn.close()

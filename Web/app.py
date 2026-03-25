@@ -15,6 +15,7 @@ import uuid
 import json
 from datetime import datetime
 from flask import Flask, render_template_string, request, send_file, redirect, url_for, flash
+from werkzeug.utils import secure_filename
 
 # Ensure the mssp/ root is on the path regardless of how the script is invoked
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -36,7 +37,9 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(_ROOT, ".env"))
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-only-change-this")
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
+if not app.secret_key:
+    raise ValueError("FLASK_SECRET_KEY not set in .env")
 
 REPORTS_DIR = os.path.join(os.path.dirname(__file__), "../data/reports")
 os.makedirs(REPORTS_DIR, exist_ok=True)
@@ -347,6 +350,7 @@ def submit():
 
 @app.route("/report/<filename>")
 def download_report(filename):
+    filename = secure_filename(filename)
     path = os.path.join(REPORTS_DIR, filename)
     if not os.path.exists(path):
         flash("Report not found.")

@@ -207,15 +207,13 @@ def score_intake(intake: dict) -> ScoringResult:
     if not intake.get("has_mfa"):
         tools.append("Duo / Okta (MFA)")
 
-    if intake.get("cloud_heavy") or remote_pct > 30 or not intake.get("has_mfa"):
-        tools.append("Duo / Okta (MFA)" if "Duo / Okta (MFA)" not in tools else None)
+    if (intake.get("cloud_heavy") or remote_pct > 30 or not intake.get("has_mfa")) and "Duo / Okta (MFA)" not in tools:
+        tools.append("Duo / Okta (MFA)")
 
     if intake.get("single_site") and not intake.get("has_network_monitoring"):
         tools.append("Todyl (Edge Security / UTM)")
     elif not intake.get("single_site") and normalized >= 55:
         tools.append("Todyl (SD-WAN / Network Defense)")
-
-    tools = [t for t in tools if t]  # remove None
 
     # ── Pricing ───────────────────────────────────────────────────────────────
     pricing = _calc_pricing(normalized, ec, vert, tier)
