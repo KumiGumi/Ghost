@@ -10,7 +10,7 @@ SYSTEM_BASE = """You are a senior cybersecurity consultant writing professional 
 
 def risk_assessment_prompt(scoring_summary: str, gaps: list[dict], intake: dict) -> tuple[str, str]:
     gap_text = "\n".join(
-        f"- [{g['priority']}] {g['control']} — {g['name']}: {g['gap']} (Tool: {g.get('tool', 'TBD')})"
+        f"- [{g['priority']}] {g['control']} — {g['name']}: {g['completion']}% implemented. Missing: {'; '.join(g.get('missing', [])[:3])} (Tool: {g.get('tool', 'TBD')})"
         for g in gaps
     )
     user_msg = f"""
