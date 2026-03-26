@@ -119,6 +119,15 @@ def score_intake(intake: dict) -> ScoringResult:
         remote_work_pct: int    # 0–100
         cloud_heavy: bool
         single_site: bool
+        # Security Maturity fields
+        patch_cadence: str      # "within_7_days" | "within_30_days" | "irregular" | "none"
+        has_priv_separation: bool
+        has_password_policy: bool
+        has_usb_control: bool
+        has_firewall: bool
+        backup_tested: bool
+        has_siem: bool
+        has_vendor_mgmt: bool
     """
 
     ec      = int(intake.get("employee_count", 50))
@@ -145,6 +154,8 @@ def score_intake(intake: dict) -> ScoringResult:
 
     # ── Gap scoring ───────────────────────────────────────────────────────────
     total_weight = sum(w for _, _, w, _ in CIS_IG1_CONTROLS)
+    # Add weights for the new maturity controls
+    total_weight += 6 + 5 + 5 + 3 + 6 + 4 + 5 + 4   # patch_cadence + 7 boolean controls
     gap_score    = 0.0
     gaps         = []
 
@@ -160,6 +171,107 @@ def score_intake(intake: dict) -> ScoringResult:
                 "priority": priority,
                 "tool":     tool,
             })
+
+    # ── Security Maturity gap scoring ─────────────────────────────────────────
+    # patch_cadence: CIS C7 sub — weight 6
+    patch_cadence = intake.get("patch_cadence", "none")
+    if patch_cadence == "within_7_days":
+        pass  # no gap
+    elif patch_cadence == "within_30_days":
+        gap_score += 3  # partial gap
+        gaps.append({
+            "control":  "C7",
+            "name":     "Patch Management Cadence (30-day)",
+            "gap":      "Patches applied within 30 days — consider accelerating to 7-day cycle",
+            "priority": "MEDIUM",
+            "tool":     "Qualys",
+        })
+    else:  # irregular or none
+        gap_score += 6
+        gaps.append({
+            "control":  "C7",
+            "name":     "Patch Management Cadence",
+            "gap":      "Irregular or no patch management cadence",
+            "priority": "HIGH",
+            "tool":     "Qualys",
+        })
+
+    # has_priv_separation: CIS C5 — weight 5, priority MEDIUM
+    if not intake.get("has_priv_separation", False):
+        gap_score += 5
+        gaps.append({
+            "control":  "C5",
+            "name":     "Privileged Account Separation",
+            "gap":      "Admin/privileged accounts not separated from daily-use accounts",
+            "priority": "MEDIUM",
+            "tool":     "Active Directory / Entra ID",
+        })
+
+    # has_password_policy: CIS C5 — weight 5, priority MEDIUM
+    if not intake.get("has_password_policy", False):
+        gap_score += 5
+        gaps.append({
+            "control":  "C5",
+            "name":     "Password Policy Enforcement",
+            "gap":      "No enforced password policy (length, complexity, expiry)",
+            "priority": "MEDIUM",
+            "tool":     "Active Directory / Entra ID",
+        })
+
+    # has_usb_control: CIS C10 sub — weight 3, priority MEDIUM
+    if not intake.get("has_usb_control", False):
+        gap_score += 3
+        gaps.append({
+            "control":  "C10",
+            "name":     "USB / Removable Media Control",
+            "gap":      "USB/removable media not blocked or controlled",
+            "priority": "MEDIUM",
+            "tool":     "AppLocker / Endpoint DLP",
+        })
+
+    # has_firewall: CIS C13 — weight 6, priority HIGH
+    if not intake.get("has_firewall", False):
+        gap_score += 6
+        gaps.append({
+            "control":  "C13",
+            "name":     "Firewall / Perimeter Defense",
+            "gap":      "No firewall or perimeter security device in place",
+            "priority": "HIGH",
+            "tool":     "Todyl (Edge Security / UTM)",
+        })
+
+    # backup_tested: CIS C11 sub — weight 4, priority HIGH
+    if not intake.get("backup_tested", False):
+        gap_score += 4
+        gaps.append({
+            "control":  "C11",
+            "name":     "Backup Testing",
+            "gap":      "Backups not tested in the last 12 months",
+            "priority": "HIGH",
+            "tool":     None,
+        })
+
+    # has_siem: CIS C8 — weight 5, priority MEDIUM
+    if not intake.get("has_siem", False):
+        gap_score += 5
+        gaps.append({
+            "control":  "C8",
+            "name":     "Logging / SIEM",
+            "gap":      "No centralized logging or SIEM solution in place",
+            "priority": "MEDIUM",
+            "tool":     "Huntress (Managed SOC)",
+        })
+
+    # has_vendor_mgmt: CIS C15 — weight 4, priority MEDIUM
+    if not intake.get("has_vendor_mgmt", False):
+        gap_score += 4
+        gaps.append({
+            "control":  "C15",
+            "name":     "Vendor / Third-Party Access Management",
+            "gap":      "Vendor and third-party access not formally controlled",
+            "priority": "MEDIUM",
+            "tool":     None,
+        })
 
     # ── Compliance uplift ─────────────────────────────────────────────────────
     compliance_score = 0
@@ -220,6 +332,11 @@ def score_intake(intake: dict) -> ScoringResult:
 
     # ── Summary for AI prompt context ─────────────────────────────────────────
     gap_names = [g["name"] for g in gaps if g["priority"] in ("CRITICAL", "HIGH")]
+    patch_note = ""
+    if patch_cadence in ("irregular", "none"):
+        patch_note = " Patch management cadence is a critical gap (irregular/none)."
+    elif patch_cadence == "within_30_days":
+        patch_note = " Patch management cadence is suboptimal (30-day cycle)."
     summary = (
         f"Client is a {ec}-employee {vert} organization with a risk score of {normalized}/100. "
         f"Recommended tier: {tier}. "
@@ -227,6 +344,7 @@ def score_intake(intake: dict) -> ScoringResult:
         f"Compliance requirements: {'HIPAA ' if intake.get('needs_hipaa') else ''}"
         f"{'SOC2' if intake.get('needs_soc2') else ''}. "
         f"Estimated engagement value: ${pricing['low']:,}–${pricing['high']:,} {pricing['period']}."
+        f"{patch_note}"
     )
 
     return ScoringResult(

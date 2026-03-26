@@ -193,6 +193,45 @@ FORM_HTML = """
         </div>
 
         <div class="section">
+            <h2>Security Maturity</h2>
+            <p style="color:#6c757d; font-size:12px; margin-bottom:14px;">
+                Additional CIS IG1 maturity indicators.
+            </p>
+            <div class="field">
+                <label>Patch management cadence — how quickly are patches applied?</label>
+                <select name="patch_cadence">
+                    <option value="within_7_days">Within 7 days</option>
+                    <option value="within_30_days">Within 30 days</option>
+                    <option value="irregular">Irregular</option>
+                    <option value="none">No formal process</option>
+                </select>
+            </div>
+            <div class="checkbox-grid">
+                <label class="check-item">
+                    <input type="checkbox" name="has_priv_separation"> Admin/privileged accounts separated from daily-use accounts
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="has_password_policy"> Password policy enforced (length, complexity, expiry)
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="has_usb_control"> USB / removable media blocked or controlled
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="has_firewall"> Firewall / perimeter device in place
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="backup_tested"> Backups tested in last 12 months
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="has_siem"> Logging / SIEM in place
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="has_vendor_mgmt"> Vendor / third-party access controlled
+                </label>
+            </div>
+        </div>
+
+        <div class="section">
             <h2>Compliance Requirements</h2>
             <div class="checkbox-grid">
                 <label class="check-item">
@@ -279,6 +318,15 @@ def submit():
         "has_software_inventory": "has_software_inventory" in request.form,
         "needs_hipaa":        "needs_hipaa"         in request.form,
         "needs_soc2":         "needs_soc2"          in request.form,
+        # Security Maturity fields
+        "patch_cadence":      request.form.get("patch_cadence", "none"),
+        "has_priv_separation": "has_priv_separation" in request.form,
+        "has_password_policy": "has_password_policy" in request.form,
+        "has_usb_control":    "has_usb_control"     in request.form,
+        "has_firewall":       "has_firewall"         in request.form,
+        "backup_tested":      "backup_tested"        in request.form,
+        "has_siem":           "has_siem"             in request.form,
+        "has_vendor_mgmt":    "has_vendor_mgmt"      in request.form,
     }
 
     # Coerce numeric fields before anonymization
