@@ -191,6 +191,7 @@ async def lastreport_cmd(interaction: discord.Interaction):
         color=_score_color(score),
     )
     embed.add_field(name="Risk Score", value=_score_bar(score), inline=False)
+    embed.add_field(name="Grade",      value=f"**{data.get("grade", "?")}**", inline=True)
     embed.add_field(name="Tier",       value=data.get("tier", "—"), inline=True)
     embed.add_field(name="Pricing",
                     value=f"${data.get('price_low', 0):,}–${data.get('price_high', 0):,} / {data.get('price_period', '—')}",
